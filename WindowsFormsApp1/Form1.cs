@@ -12,6 +12,7 @@ namespace WindowsFormsApp1
         bool[] doNext = new bool[5];
         int i; int j;
         public String port;
+        public static String path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MacroBox\\MacroBoxConfig.txt";
         public Form1()
         {
             for(int i = 0; i < keys.Length; i++)
@@ -30,7 +31,7 @@ namespace WindowsFormsApp1
             backgroundWorker1.RunWorkerCompleted += BackgroundWorker1_RunWorkerCompleted;
             this.Icon = Properties.Resources.Untitled;
 
-            if (System.IO.File.Exists("./config.txt"))
+            if (System.IO.File.Exists(path))
             {
                 LoadFromFile();
             } else
@@ -41,7 +42,7 @@ namespace WindowsFormsApp1
                 }
                 else
                 {
-                    port = "No ports found"; //comment
+                    port = "No ports found"; 
                 }
             }
             RefreshPorts_Click(null, null);
@@ -52,22 +53,29 @@ namespace WindowsFormsApp1
 
         private void LoadFromFile()
         {
-            String[] lines = System.IO.File.ReadAllLines("./config.txt");
-            port = lines[0];
-            for(int i = 1; i < lines.Length; i++)
+            try
             {
-                keys[(i - 1) / keys[2].Length][(i - 1) % keys[0].Length] = lines[i];
+                String[] lines = System.IO.File.ReadAllLines(path);
+                port = lines[0];
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    keys[(i - 1) / keys[2].Length][(i - 1) % keys[0].Length] = lines[i];
+                }
+                textBox1.Text = lines[1];
+                textBox2.Text = lines[2];
+                textBox4.Text = lines[3];
+                textBox3.Text = lines[4];
+                textBox6.Text = lines[5];
+                textBox5.Text = lines[6];
+                textBox8.Text = lines[7];
+                textBox7.Text = lines[8];
+                textBox12.Text = lines[9];
+                textBox11.Text = lines[10];
+            } catch(Exception e)
+            {
+                //just pass here, we set  as many as we could
             }
-            textBox1.Text = lines[1];
-            textBox2.Text = lines[2];
-            textBox4.Text = lines[3];
-            textBox3.Text = lines[4];
-            textBox6.Text = lines[5];
-            textBox5.Text = lines[6];
-            textBox8.Text = lines[7];
-            textBox7.Text = lines[8];
-            textBox12.Text = lines[9];
-            textBox11.Text = lines[10];
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -134,7 +142,6 @@ namespace WindowsFormsApp1
                 else if (serialPort.BytesToRead > 0)
                 {
                     int i = serialPort.ReadByte();
-                    serialPort.DiscardInBuffer();
                     if (i > 4)
                     {
                         throw new InvalidEnumArgumentException("This is not the right port!");
@@ -145,6 +152,7 @@ namespace WindowsFormsApp1
                         doNext[i] = !doNext[i];
                     }
                 }
+                System.Threading.Thread.Sleep(100);
             }
             
         }
@@ -179,19 +187,22 @@ namespace WindowsFormsApp1
         {
             port = PortList.SelectedItem.ToString();
             if (backgroundWorker1.IsBusy) backgroundWorker1.CancelAsync();
-           // while (backgroundWorker1.IsBusy) { } //stall until that changes;
-            
-            
+            else backgroundWorker1.RunWorkerAsync();
         }
 
         private void SaveConfig_Click(object sender, EventArgs e)
         {
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"./config.txt"))
+            button1_Click(null, null);
+            button2_Click_1(null, null);
+            button3_Click(null, null);
+            button4_Click(null, null);
+            button6_Click(null, null);
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(path))
             {
                 file.WriteLineAsync(port);
                 foreach (String[] ss in keys)
                 {
-                    foreach(String s in ss)
+                    foreach (String s in ss)
                     {
                         file.WriteLineAsync(s);
                     }
